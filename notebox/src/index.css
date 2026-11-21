@@ -200,3 +200,15 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
   flex-shrink: 0;
 }
 .brand-name { font-size: 24px; font-weight: 700; }
+.with-icon { display: flex; align-items: center; gap: 14px; }
+.ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--chip);
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
