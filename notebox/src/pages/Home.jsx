@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import ThemeToggle from "../components/ThemeToggle";
+import Brand from "../components/Brand";
 export default function Home() {
   const [query, setQuery] = useState("");
   const [subjects, setSubjects] = useState([]);
@@ -28,13 +29,11 @@ export default function Home() {
 
   return (
     <main className="app">
-     <header className="top">
-  <h1>Notebox</h1>
-  <div className="top-right">
-    <span className="muted">Sem 5 · Section A</span>
-    <ThemeToggle />
-  </div>
+    <header className="top">
+  <Brand />
+  <ThemeToggle />
 </header>
+<div className="muted">Sem 5 · Section A</div>
 
       <input
         className="search"

@@ -69,7 +69,7 @@ export default function Section() {
 
   return (
     <main className="app">
-      <Link className="back" to={`/subject/${code}`} aria-label="Back">‹</Link>
+      <BackLink to={`/subject/${code}`} />
       <div>
         <h1>{TITLES[section] || "Files"}</h1>
         <div className="muted">{code}</div>

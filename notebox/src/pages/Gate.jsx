@@ -24,7 +24,7 @@ export default function Gate({ onUnlock }) {
 
   return (
     <main className="app">
-      <h1>Notebox</h1>
+  <Brand size={72} />
       <p className="muted">Enter your class code to continue.</p>
       <form className="form" onSubmit={submit}>
         <label>

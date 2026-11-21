@@ -156,7 +156,7 @@ export default function Upload() {
 
   return (
     <main className="app">
-      <Link className="back" to="/" aria-label="Back">‹</Link>
+      <BackLink to="/" />
       <h1>Add notes or paper</h1>
 
       <div className="seg" role="group" aria-label="What are you adding?">

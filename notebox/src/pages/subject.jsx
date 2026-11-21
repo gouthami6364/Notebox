@@ -51,7 +51,7 @@ export default function Subject() {
   if (!subject) {
     return (
       <main className="app">
-        <Link className="back" to="/" aria-label="Back">‹</Link>
+       <BackLink to="/" />
         <p>Subject not found.</p>
       </main>
     );
