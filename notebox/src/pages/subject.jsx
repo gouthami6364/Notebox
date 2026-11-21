@@ -34,9 +34,10 @@ export default function Subject() {
       setSubject(s.data);
 
       const d = await supabase
-        .from("documents")
-        .select("section")
-        .eq("subject_code", code);
+  .from("documents")
+  .select("section")
+  .eq("subject_code", code)
+  .is("deleted_at", null);
       const c = {};
       (d.data || []).forEach((row) => {
         c[row.section] = (c[row.section] || 0) + 1;
