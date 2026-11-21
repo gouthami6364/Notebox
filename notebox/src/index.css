@@ -156,3 +156,30 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
 .thumbs span { flex: 1; }
 .thumbs button { width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--chip); color: var(--ink); cursor: pointer; }
 .error { color: var(--error); margin: 0; font-size: 14px; }
+.form input[type="file"] {
+  min-height: 56px;
+  padding: 8px;
+  border: 2px dashed var(--field-line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.form input[type="file"]:hover {
+  border-color: var(--accent);
+}
+.form input[type="file"]::file-selector-button {
+  min-height: 40px;
+  margin-right: 12px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
