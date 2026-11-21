@@ -1,34 +1,38 @@
 import { PDFDocument } from "pdf-lib";
+import * as pdfjs from "pdfjs-dist";
+import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 export async function compressPdf(file, onProgress) {
-  const pdfjs = await import("pdfjs-dist");
-  const worker = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
-  pdfjs.GlobalWorkerOptions.workerSrc = worker;
-
   const data = new Uint8Array(await file.arrayBuffer());
- const src = await pdfjs.getDocument({
-  data,
-  isEvalSupported: false,
-  enableScripting: false,
-}).promise;
+  const src = await pdfjs.getDocument({
+    data,
+    isEvalSupported: false,
+    enableScripting: false,
+  }).promise;
   const out = await PDFDocument.create();
 
   for (let i = 1; i <= src.numPages; i++) {
     const page = await src.getPage(i);
     const base = page.getViewport({ scale: 1 });
-    const scale = 1600 / Math.max(base.width, base.height);
+    const scale = 1400 / Math.max(base.width, base.height);
     const viewport = page.getViewport({ scale });
 
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(viewport.width);
     canvas.height = Math.round(viewport.height);
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    await page.render({
+      canvas,
+      canvasContext: ctx,
+      viewport,
+      background: "#ffffff",
+    }).promise;
 
     const blob = await new Promise((res) =>
-      canvas.toBlob(res, "image/jpeg", 0.65)
+      canvas.toBlob(res, "image/jpeg", 0.6)
     );
     const img = await out.embedJpg(await blob.arrayBuffer());
     const p = out.addPage([canvas.width, canvas.height]);
