@@ -39,7 +39,10 @@ function detail(d, section) {
     day: "numeric", month: "short",
   });
 }
-
+function kind(path) {
+  const ext = path.split(".").pop().toLowerCase();
+  return ext === "pdf" ? "Open" : `${ext.toUpperCase()} · Download`;
+}
 export default function Section() {
   const { code, section } = useParams();
   const [docs, setDocs] = useState([]);
@@ -88,7 +91,7 @@ export default function Section() {
                   {d.uploaded_by ? ` · ${d.uploaded_by}` : ""}
                 </span>
               </span>
-              <span className="muted">Open</span>
+              <span className="muted">{kind(d.file_path)}</span>
             </a>
           </li>
         ))}
