@@ -1,9 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { subjects } from "../data/subjects";
+import { supabase } from "../lib/supabase";
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("subjects")
+      .select("code, name")
+      .order("code")
+      .then(({ data, error }) => {
+        if (error) setError("Could not load subjects.");
+        else setSubjects(data);
+        setLoading(false);
+      });
+  }, []);
 
   const shown = subjects.filter(
     (s) =>
@@ -38,10 +53,14 @@ export default function Home() {
             </Link>
           </li>
         ))}
-        {shown.length === 0 && <li className="empty">No subject found</li>}
+        {loading && <li className="empty">Loading...</li>}
+        {error && <li className="empty">{error}</li>}
+        {!loading && !error && shown.length === 0 && (
+          <li className="empty">No subject found</li>
+        )}
       </ul>
 
-      <button className="primary">+ Add notes or paper</button>
+      <Link className="primary" to="/upload">+ Add notes or paper</Link>
     </main>
   );
 }
