@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import BackLink from "../components/BackLink";
 
 const TITLES = {
   notes: "Notes",
   homework: "Today's homework",
+  assignment: "Assignments",
   internal: "Internal papers",
   external: "External papers",
-  assignment: "Assignments",
 };
 
 function sortDocs(docs, section) {
@@ -30,20 +31,25 @@ function sortDocs(docs, section) {
 function detail(d, section) {
   if (section === "internal" && d.exam_date) {
     return new Date(d.exam_date).toLocaleDateString("en-IN", {
-      day: "numeric", month: "short", year: "numeric",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   }
   if (section === "external") {
     return [d.academic_year, d.session].filter(Boolean).join(" · ");
   }
   return new Date(d.created_at).toLocaleDateString("en-IN", {
-    day: "numeric", month: "short",
+    day: "numeric",
+    month: "short",
   });
 }
+
 function kind(path) {
   const ext = path.split(".").pop().toLowerCase();
   return ext === "pdf" ? "Open" : `${ext.toUpperCase()} · Download`;
 }
+
 export default function Section() {
   const { code, section } = useParams();
   const [docs, setDocs] = useState([]);
@@ -58,7 +64,7 @@ export default function Section() {
       .eq("section", section)
       .then(({ data, error }) => {
         if (error) setError("Could not load files.");
-        else setDocs(sortDocs(data, section));
+        else setDocs(sortDocs(data || [], section));
         setLoading(false);
       });
   }, [code, section]);
