@@ -13,7 +13,7 @@ const SECTIONS = [
 ];
 const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 const ALLOWED = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt"];
-const MAX_MB = 10;
+const MAX_MB = 15;
 
 function extOf(name) {
   const i = name.lastIndexOf(".");
