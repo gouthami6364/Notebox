@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import {
+  BookOpen,
+  PenLine,
+  FileText,
+  CalendarCheck,
+  GraduationCap,
+} from "lucide-react";
 import { supabase } from "../lib/supabase";
+import BackLink from "../components/BackLink";
 
 const SECTIONS = [
-  { id: "notes", title: "Notes", hint: "Newest first" },
-  { id: "homework", title: "Today's homework", hint: "Newest first" },
-  { id: "assignment", title: "Assignments", hint: "Newest first" },
-  { id: "internal", title: "Internal papers", hint: "By date" },
-  { id: "external", title: "External papers", hint: "By academic year and session" },
+  { id: "notes", title: "Notes", hint: "Newest first", Icon: BookOpen },
+  { id: "homework", title: "Today's homework", hint: "Newest first", Icon: PenLine },
+  { id: "assignment", title: "Assignments", hint: "Newest first", Icon: FileText },
+  { id: "internal", title: "Internal papers", hint: "By date", Icon: CalendarCheck },
+  { id: "external", title: "External papers", hint: "By academic year and session", Icon: GraduationCap },
 ];
 
 export default function Subject() {
@@ -42,7 +50,7 @@ export default function Subject() {
   if (loading) {
     return (
       <main className="app">
-        <Link className="back" to="/" aria-label="Back">‹</Link>
+        <BackLink to="/" />
         <p className="muted">Loading...</p>
       </main>
     );
@@ -51,7 +59,7 @@ export default function Subject() {
   if (!subject) {
     return (
       <main className="app">
-       <BackLink to="/" />
+        <BackLink to="/" />
         <p>Subject not found.</p>
       </main>
     );
@@ -59,7 +67,7 @@ export default function Subject() {
 
   return (
     <main className="app">
-      <Link className="back" to="/" aria-label="Back">‹</Link>
+      <BackLink to="/" />
 
       <div>
         <h1>{subject.name}</h1>
@@ -70,10 +78,15 @@ export default function Subject() {
         {SECTIONS.map((sec) => (
           <li key={sec.id}>
             <Link className="row between" to={`/subject/${code}/${sec.id}`}>
-              <span>
-                <strong>{sec.title}</strong>
-                <br />
-                <span className="muted">{sec.hint}</span>
+              <span className="with-icon">
+                <span className="ico" aria-hidden="true">
+                  <sec.Icon size={22} />
+                </span>
+                <span>
+                  <strong>{sec.title}</strong>
+                  <br />
+                  <span className="muted">{sec.hint}</span>
+                </span>
               </span>
               <span className="muted">{counts[sec.id] || 0}</span>
             </Link>
