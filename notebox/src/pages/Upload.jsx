@@ -86,7 +86,7 @@ export default function Upload() {
       }
     } catch (err) {
       console.error(err);
-      setMessage("Could not shrink this PDF. Try a computer, or split the file.");
+      setMessage(`Could not shrink: ${err?.message || err}`);
     }
     setShrinking(false);
     setProgress("");
