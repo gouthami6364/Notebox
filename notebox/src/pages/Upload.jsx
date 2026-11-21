@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { makePdf } from "../lib/makePdf";
+import BackLink from "../components/BackLink";
 
 const SECTIONS = [
   { id: "notes", label: "Notes" },
@@ -12,7 +13,7 @@ const SECTIONS = [
 ];
 const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 const ALLOWED = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt"];
-const MAX_MB = 20;
+const MAX_MB = 10;
 
 function extOf(name) {
   const i = name.lastIndexOf(".");
