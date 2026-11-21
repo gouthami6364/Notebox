@@ -97,3 +97,4 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
 .primary:disabled { opacity: .6; cursor: not-allowed; }
 .row.between { display: flex; justify-content: space-between; align-items: center; }
 a.row { color: var(--ink); }
+.back.wide { width: auto; padding: 0 16px; font-size: 15px; font-weight: 600; }

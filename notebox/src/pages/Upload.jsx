@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { makePdf } from "../lib/makePdf";
 
+
 const SECTIONS = [
   { id: "notes", label: "Notes" },
   { id: "homework", label: "Today's homework" },
   { id: "internal", label: "Internal paper" },
   { id: "external", label: "External paper" },
 ];
+
 const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 
 export default function Upload() {
@@ -24,6 +26,7 @@ export default function Upload() {
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [done, setDone] = useState(null);
 
   useEffect(() => {
     supabase
@@ -87,14 +90,31 @@ export default function Upload() {
       });
       if (ins.error) throw ins.error;
 
-      navigate(`/subject/${subject}`);
+     setDone({ subject, section, title: title.trim() });
+     setBusy(false);
     } catch (err) {
       console.error(err);
       setMessage("Upload failed. Check your connection and try again.");
       setBusy(false);
     }
   }
-
+if (done) {
+  const link = `${window.location.origin}/#/subject/${done.subject}/${done.section}`;
+  const text = `New upload: ${done.title} (${done.subject}). Open it here: ${link}`;
+  const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  return (
+    <main className="app">
+      <h1>Uploaded</h1>
+      <p className="muted">Let the class know with one tap.</p>
+      <a className="primary" href={wa} target="_blank" rel="noreferrer">
+        Share to WhatsApp
+      </a>
+      <Link className="back wide" to={`/subject/${done.subject}`}>
+        Back to subject
+      </Link>
+    </main>
+  );
+}
   return (
     <main className="app">
       <Link className="back" to="/" aria-label="Back">‹</Link>
