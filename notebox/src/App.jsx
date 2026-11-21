@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Subject from "./pages/subject";
 import Section from "./pages/Section";
 import Upload from "./pages/Upload";
+import Edit from "./pages/Edit";
 
 export default function App() {
   const [status, setStatus] = useState("checking"); // checking | locked | open
@@ -38,6 +39,7 @@ export default function App() {
       <Route path="/subject/:code" element={<Subject />} />
       <Route path="/subject/:code/:section" element={<Section />} />
       <Route path="/upload" element={<Upload />} />
+      <Route path="/edit/:id" element={<Edit />} />
     </Routes>
   );
 }

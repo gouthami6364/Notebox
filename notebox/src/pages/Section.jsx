@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { Pencil } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BackLink from "../components/BackLink";
 
@@ -62,6 +63,7 @@ export default function Section() {
       .select("*")
       .eq("subject_code", code)
       .eq("section", section)
+      .is("deleted_at", null)
       .then(({ data, error }) => {
         if (error) setError("Could not load files.");
         else setDocs(sortDocs(data || [], section));
@@ -83,7 +85,7 @@ export default function Section() {
 
       <ul className="list">
         {docs.map((d) => (
-          <li key={d.id}>
+          <li key={d.id} className="doc-item">
             <a
               className="row between"
               href={urlFor(d.file_path)}
@@ -100,6 +102,13 @@ export default function Section() {
               </span>
               <span className="muted">{kind(d.file_path)}</span>
             </a>
+            <Link
+              className="edit-btn"
+              to={`/edit/${d.id}`}
+              aria-label={`Edit ${d.title}`}
+            >
+              <Pencil size={18} aria-hidden="true" />
+            </Link>
           </li>
         ))}
         {loading && <li className="empty">Loading...</li>}
