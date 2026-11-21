@@ -10,7 +10,6 @@ const SECTIONS = [
   { id: "internal", label: "Internal paper" },
   { id: "external", label: "External paper" },
 ];
-const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 
 export default function Edit() {
   const { id } = useParams();
@@ -45,10 +44,6 @@ export default function Edit() {
     e.preventDefault();
     setMessage("");
     if (!doc.title.trim()) return setMessage("Add a title.");
-    if (doc.section === "internal" && !doc.exam_date)
-      return setMessage("Choose the exam date.");
-    if (doc.section === "external" && !(doc.academic_year || "").trim())
-      return setMessage("Enter the academic year, like 2025-26.");
 
     setBusy(true);
     const { error } = await supabase
@@ -57,10 +52,6 @@ export default function Edit() {
         subject_code: doc.subject_code,
         section: doc.section,
         title: doc.title.trim(),
-        exam_date: doc.section === "internal" ? doc.exam_date : null,
-        academic_year: doc.section === "external" ? doc.academic_year.trim() : null,
-        session:
-          doc.section === "external" ? doc.session || SESSIONS[0] : null,
       })
       .eq("id", id);
     if (error) {
@@ -133,39 +124,6 @@ export default function Edit() {
           Title
           <input value={doc.title} onChange={(e) => set("title", e.target.value)} />
         </label>
-
-        {doc.section === "internal" && (
-          <label>
-            Exam date
-            <input
-              type="date"
-              value={doc.exam_date || ""}
-              onChange={(e) => set("exam_date", e.target.value)}
-            />
-          </label>
-        )}
-
-        {doc.section === "external" && (
-          <>
-            <label>
-              Academic year
-              <input
-                value={doc.academic_year || ""}
-                onChange={(e) => set("academic_year", e.target.value)}
-                placeholder="2025-26"
-              />
-            </label>
-            <label>
-              Session
-              <select
-                value={doc.session || SESSIONS[0]}
-                onChange={(e) => set("session", e.target.value)}
-              >
-                {SESSIONS.map((s) => <option key={s}>{s}</option>)}
-              </select>
-            </label>
-          </>
-        )}
 
         {message && <p className="error">{message}</p>}
 

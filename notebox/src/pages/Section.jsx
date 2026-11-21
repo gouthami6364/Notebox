@@ -12,37 +12,15 @@ const TITLES = {
   external: "External papers",
 };
 
-function sortDocs(docs, section) {
-  const copy = [...docs];
-  if (section === "internal") {
-    copy.sort((a, b) => (b.exam_date || "").localeCompare(a.exam_date || ""));
-  } else if (section === "external") {
-    const order = { "Dec-Jan": 1, "Jun-Jul": 2 };
-    copy.sort(
-      (a, b) =>
-        (b.academic_year || "").localeCompare(a.academic_year || "") ||
-        (order[b.session] || 0) - (order[a.session] || 0)
-    );
-  } else {
-    copy.sort((a, b) => b.created_at.localeCompare(a.created_at));
-  }
-  return copy;
+function sortDocs(docs) {
+  return [...docs].sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
-function detail(d, section) {
-  if (section === "internal" && d.exam_date) {
-    return new Date(d.exam_date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
-  if (section === "external") {
-    return [d.academic_year, d.session].filter(Boolean).join(" · ");
-  }
+function detail(d) {
   return new Date(d.created_at).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
+    year: "numeric",
   });
 }
 
@@ -66,7 +44,7 @@ export default function Section() {
       .is("deleted_at", null)
       .then(({ data, error }) => {
         if (error) setError("Could not load files.");
-        else setDocs(sortDocs(data || [], section));
+        else setDocs(sortDocs(data || []));
         setLoading(false);
       });
   }, [code, section]);
@@ -96,7 +74,7 @@ export default function Section() {
                 <strong>{d.title}</strong>
                 <br />
                 <span className="muted">
-                  {detail(d, section)}
+                  {detail(d)}
                   {d.uploaded_by ? ` · ${d.uploaded_by}` : ""}
                 </span>
               </span>

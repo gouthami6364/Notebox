@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { makePdf } from "../lib/makePdf";
+import { compressPdf } from "../lib/compressPdf";
 import BackLink from "../components/BackLink";
 
 const SECTIONS = [
@@ -11,9 +12,9 @@ const SECTIONS = [
   { id: "external", label: "External paper" },
   { id: "assignment", label: "Assignment" },
 ];
-const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 const ALLOWED = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt"];
 const MAX_MB = 15;
+const RAW_MAX_MB = 150;
 
 function extOf(name) {
   const i = name.lastIndexOf(".");
@@ -26,13 +27,12 @@ export default function Upload() {
   const [subject, setSubject] = useState("");
   const [section, setSection] = useState("notes");
   const [title, setTitle] = useState("");
-  const [examDate, setExamDate] = useState("");
-  const [year, setYear] = useState("");
-  const [session, setSession] = useState(SESSIONS[0]);
   const [name, setName] = useState("");
   const [files, setFiles] = useState([]);
   const [docFile, setDocFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [shrinking, setShrinking] = useState(false);
+  const [progress, setProgress] = useState("");
   const [message, setMessage] = useState("");
   const [done, setDone] = useState(null);
 
@@ -61,13 +61,35 @@ export default function Upload() {
       setMessage("Use a PDF, Word, PowerPoint, Excel or text file.");
       return;
     }
-    if (f.size > MAX_MB * 1024 * 1024) {
-      setMessage(`That file is over ${MAX_MB} MB. Try a smaller one.`);
+    const isPdf = extOf(f.name) === "pdf";
+    const limit = isPdf ? RAW_MAX_MB : MAX_MB;
+    if (f.size > limit * 1024 * 1024) {
+      setMessage(`That file is over ${limit} MB. Try a smaller one.`);
       return;
     }
     setMessage("");
     setDocFile(f);
     if (!title.trim()) setTitle(f.name.replace(/\.[^.]+$/, ""));
+  }
+
+  async function shrink() {
+    setMessage("");
+    setShrinking(true);
+    try {
+      const out = await compressPdf(docFile, (i, n) =>
+        setProgress(`Page ${i} of ${n}`)
+      );
+      if (out.size >= docFile.size) {
+        setMessage("This PDF can't be made smaller.");
+      } else {
+        setDocFile(new File([out], docFile.name, { type: "application/pdf" }));
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Could not shrink this PDF. Try a computer, or split the file.");
+    }
+    setShrinking(false);
+    setProgress("");
   }
 
   function move(i, d) {
@@ -91,11 +113,9 @@ export default function Upload() {
     if (mode === "photos" && files.length === 0)
       return setMessage("Add at least one photo.");
     if (mode === "file" && !docFile) return setMessage("Choose a file.");
+    if (mode === "file" && docFile.size > MAX_MB * 1024 * 1024)
+      return setMessage(`Shrink the PDF below ${MAX_MB} MB first.`);
     if (!title.trim()) return setMessage("Add a title.");
-    if (section === "internal" && !examDate)
-      return setMessage("Choose the exam date.");
-    if (section === "external" && !year.trim())
-      return setMessage("Enter the academic year, like 2025-26.");
 
     setBusy(true);
     try {
@@ -120,9 +140,6 @@ export default function Upload() {
         subject_code: subject,
         section,
         title: title.trim(),
-        exam_date: section === "internal" ? examDate : null,
-        academic_year: section === "external" ? year.trim() : null,
-        session: section === "external" ? session : null,
         file_path: path,
         uploaded_by: name.trim() || null,
       });
@@ -206,31 +223,13 @@ export default function Upload() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Unit 2 notes"
+            placeholder={
+              section === "internal" ? "IA 1, 14 Mar 2025"
+              : section === "external" ? "2025-26 Dec-Jan"
+              : "Unit 2 notes"
+            }
           />
         </label>
-
-        {section === "internal" && (
-          <label>
-            Exam date
-            <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
-          </label>
-        )}
-
-        {section === "external" && (
-          <>
-            <label>
-              Academic year
-              <input value={year} onChange={(e) => setYear(e.target.value)} placeholder="2025-26" />
-            </label>
-            <label>
-              Session
-              <select value={session} onChange={(e) => setSession(e.target.value)}>
-                {SESSIONS.map((s) => <option key={s}>{s}</option>)}
-              </select>
-            </label>
-          </>
-        )}
 
         <label>
           Your name (optional)
@@ -262,7 +261,7 @@ export default function Upload() {
         {mode === "file" && (
           <>
             <label>
-              File (PDF, Word, PowerPoint, Excel or text, up to {MAX_MB} MB)
+              File (PDF, Word, PowerPoint, Excel or text, up to {RAW_MAX_MB} MB for PDFs, {MAX_MB} MB for other files)
               <input
                 type="file"
                 accept={ALLOWED.map((e) => "." + e).join(",")}
@@ -270,16 +269,23 @@ export default function Upload() {
               />
             </label>
             {docFile && (
-              <p className="muted">
-                Selected: {docFile.name} ({(docFile.size / 1024 / 1024).toFixed(1)} MB)
-              </p>
+              <>
+                <p className="muted">
+                  Selected: {docFile.name} ({(docFile.size / 1024 / 1024).toFixed(1)} MB)
+                </p>
+                {extOf(docFile.name) === "pdf" && docFile.size > 5 * 1024 * 1024 && (
+                  <button type="button" className="seg-btn" onClick={shrink} disabled={shrinking}>
+                    {shrinking ? `Shrinking... ${progress}` : "Shrink this PDF"}
+                  </button>
+                )}
+              </>
             )}
           </>
         )}
 
         {message && <p className="error">{message}</p>}
 
-        <button className="primary" disabled={busy}>
+        <button className="primary" disabled={busy || shrinking}>
           {busy
             ? "Uploading..."
             : mode === "photos"

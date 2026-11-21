@@ -225,3 +225,12 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
   background: transparent; color: var(--error); font-size: 15px; font-weight: 600; cursor: pointer;
 }
 .danger:disabled { opacity: .6; cursor: not-allowed; }
+@media (max-width: 600px) {
+  .primary { margin-top: 0; }
+}
+.seg-btn {
+  min-height: 48px; border: 1px solid var(--accent); border-radius: 14px;
+  background: transparent; color: var(--accent);
+  font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.seg-btn:disabled { opacity: .6; cursor: not-allowed; }
