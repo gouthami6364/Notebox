@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 const SECTIONS = [
   { id: "notes", title: "Notes", hint: "Newest first" },
   { id: "homework", title: "Today's homework", hint: "Newest first" },
+  { id: "assignment", title: "Assignments", hint: "Newest first" },
   { id: "internal", title: "Internal papers", hint: "By date" },
   { id: "external", title: "External papers", hint: "By academic year and session" },
 ];

@@ -8,6 +8,7 @@ const SECTIONS = [
   { id: "homework", label: "Today's homework" },
   { id: "internal", label: "Internal paper" },
   { id: "external", label: "External paper" },
+  { id: "assignment", label: "Assignment" },
 ];
 const SESSIONS = ["Dec-Jan", "Jun-Jul"];
 const ALLOWED = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt"];

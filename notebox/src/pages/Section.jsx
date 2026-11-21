@@ -7,6 +7,7 @@ const TITLES = {
   homework: "Today's homework",
   internal: "Internal papers",
   external: "External papers",
+  assignment: "Assignments",
 };
 
 function sortDocs(docs, section) {
