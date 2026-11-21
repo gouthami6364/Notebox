@@ -6,11 +6,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
 export async function compressPdf(file, onProgress) {
   const data = new Uint8Array(await file.arrayBuffer());
-  const src = await pdfjs.getDocument({
+
+  const task = pdfjs.getDocument({
     data,
     isEvalSupported: false,
     enableScripting: false,
-  }).promise;
+  });
+  const src = await task.promise;
   const out = await PDFDocument.create();
 
   for (let i = 1; i <= src.numPages; i++) {
@@ -44,7 +46,12 @@ export async function compressPdf(file, onProgress) {
     onProgress?.(i, src.numPages);
   }
 
-  await src.destroy();
+  try {
+    await task.destroy();
+  } catch {
+    // cleanup is optional, so ignore errors here
+  }
+
   const bytes = await out.save();
   return new Blob([bytes], { type: "application/pdf" });
 }
