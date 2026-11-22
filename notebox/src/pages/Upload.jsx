@@ -8,12 +8,12 @@ import BackLink from "../components/BackLink";
 const SECTIONS = [
   { id: "notes", label: "Notes" },
   { id: "homework", label: "Today's homework" },
+  { id: "assignment", label: "Assignment" },
   { id: "internal", label: "Internal paper" },
   { id: "external", label: "External paper" },
-  { id: "assignment", label: "Assignment" },
 ];
 const ALLOWED = ["pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt"];
-const MAX_MB = 15;
+const MAX_MB = 20;
 const RAW_MAX_MB = 150;
 
 function extOf(name) {
@@ -22,24 +22,25 @@ function extOf(name) {
 }
 
 export default function Upload() {
+  const [params] = useSearchParams();
+  const presetSubject = params.get("subject") || "";
+  const presetSection = params.get("section") || "";
+
   const [subjects, setSubjects] = useState([]);
   const [mode, setMode] = useState("photos"); // photos | file
-  const [params] = useSearchParams();
-const presetSubject = params.get("subject") || "";
-const presetSection = params.get("section") || "";
-const [subject, setSubject] = useState(presetSubject);
-const [section, setSection] = useState(
-  SECTIONS.some((s) => s.id === presetSection) ? presetSection : "notes"
-);
+  const [subject, setSubject] = useState(presetSubject);
+  const [section, setSection] = useState(
+    SECTIONS.some((s) => s.id === presetSection) ? presetSection : "notes"
+  );
   const [title, setTitle] = useState("");
   const [name, setName] = useState("");
   const [files, setFiles] = useState([]);
   const [docFile, setDocFile] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [shrinking, setShrinking] = useState(false);
-  const [progress, setProgress] = useState("");
   const [message, setMessage] = useState("");
   const [done, setDone] = useState(null);
+  const [shrinking, setShrinking] = useState(false);
+  const [progress, setProgress] = useState("");
 
   useEffect(() => {
     supabase
@@ -47,15 +48,18 @@ const [section, setSection] = useState(
       .select("code, name")
       .order("code")
       .then(({ data }) => {
-  const list = data || [];
-  setSubjects(list);
-  setSubject((old) => (list.some((s) => s.code === old) ? old : ""));
-});
-const locked =
-  Boolean(presetSubject) &&
-  SECTIONS.some((s) => s.id === presetSection) &&
-  (subjects.length === 0 || subjects.some((s) => s.code === presetSubject));
+        const list = data || [];
+        setSubjects(list);
+        setSubject((old) =>
+          old && !list.some((s) => s.code === old) ? "" : old
+        );
+      });
   }, []);
+
+  const locked =
+    Boolean(presetSubject) &&
+    SECTIONS.some((s) => s.id === presetSection) &&
+    (subjects.length === 0 || subjects.some((s) => s.code === presetSubject));
 
   function addFiles(e) {
     const picked = Array.from(e.target.files).map((f) => ({
@@ -74,8 +78,7 @@ const locked =
       setMessage("Use a PDF, Word, PowerPoint, Excel or text file.");
       return;
     }
-    const isPdf = extOf(f.name) === "pdf";
-    const limit = isPdf ? RAW_MAX_MB : MAX_MB;
+    const limit = extOf(f.name) === "pdf" ? RAW_MAX_MB : MAX_MB;
     if (f.size > limit * 1024 * 1024) {
       setMessage(`That file is over ${limit} MB. Try a smaller one.`);
       return;
@@ -178,25 +181,25 @@ const locked =
         <a className="primary" href={wa} target="_blank" rel="noreferrer">
           Share to WhatsApp
         </a>
-       <Link className="back wide" to={`/subject/${done.subject}/${done.section}`}>
-  Back to files
-</Link>
+        <Link className="back wide" to={`/subject/${done.subject}/${done.section}`}>
+          Back to files
+        </Link>
       </main>
     );
   }
 
   return (
     <main className="app">
-    <BackLink
-  to={
-    locked
-      ? `/subject/${subject}/${section}`
-      : subject
-      ? `/subject/${subject}`
-      : "/"
-  }
-/>
-   <h1>{locked ? "Add photos" : "Add notes or paper"}</h1>
+      <BackLink
+        to={
+          locked
+            ? `/subject/${subject}/${section}`
+            : subject
+            ? `/subject/${subject}`
+            : "/"
+        }
+      />
+      <h1>{locked ? "Add photos" : "Add notes or paper"}</h1>
 
       <div className="seg" role="group" aria-label="What are you adding?">
         <button
@@ -219,46 +222,49 @@ const locked =
 
       <form className="form" onSubmit={submit}>
         {locked ? (
-  <p className="context">
-    Adding to{" "}
-    <strong>
-      {subjects.find((s) => s.code === subject)?.name || subject}
-    </strong>{" "}
-    · {SECTIONS.find((s) => s.id === section)?.label}
-  </p>
-) : (
-  <>
-    <label>
-      Subject
-      <select value={subject} onChange={(e) => setSubject(e.target.value)}>
-        <option value="">Choose...</option>
-        {subjects.map((s) => (
-          <option key={s.code} value={s.code}>
-            {s.code} · {s.name}
-          </option>
-        ))}
-      </select>
-    </label>
+          <p className="context">
+            Adding to{" "}
+            <strong>
+              {subjects.find((s) => s.code === subject)?.name || subject}
+            </strong>{" "}
+            · {SECTIONS.find((s) => s.id === section)?.label}
+          </p>
+        ) : (
+          <>
+            <label>
+              Subject
+              <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+                <option value="">Choose...</option>
+                {subjects.map((s) => (
+                  <option key={s.code} value={s.code}>
+                    {s.code} · {s.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-    <label>
-      Section
-      <select value={section} onChange={(e) => setSection(e.target.value)}>
-        {SECTIONS.map((s) => (
-          <option key={s.id} value={s.id}>{s.label}</option>
-        ))}
-      </select>
-    </label>
-  </>
-)}
+            <label>
+              Section
+              <select value={section} onChange={(e) => setSection(e.target.value)}>
+                {SECTIONS.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
+
         <label>
           Title
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={
-              section === "internal" ? "IA 1, 14 Mar 2025"
-              : section === "external" ? "2025-26 Dec-Jan"
-              : "Unit 2 notes"
+              section === "internal"
+                ? "IA 1, 14 Mar 2025"
+                : section === "external"
+                ? "2025-26 Dec-Jan"
+                : "Unit 2 notes"
             }
           />
         </label>
@@ -271,27 +277,27 @@ const locked =
         {mode === "photos" && (
           <>
             <div className="photo-actions">
-  <label className="seg-btn pick">
-    Take photo
-    <input
-      className="sr-file"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      onChange={addFiles}
-    />
-  </label>
-  <label className="seg-btn pick">
-    Choose from gallery
-    <input
-      className="sr-file"
-      type="file"
-      accept="image/*"
-      multiple
-      onChange={addFiles}
-    />
-  </label>
-</div>
+              <label className="seg-btn pick">
+                Take photo
+                <input
+                  className="sr-file"
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={addFiles}
+                />
+              </label>
+              <label className="seg-btn pick">
+                Choose from gallery
+                <input
+                  className="sr-file"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={addFiles}
+                />
+              </label>
+            </div>
             {files.length > 0 && (
               <ul className="thumbs">
                 {files.map((f, i) => (
@@ -311,7 +317,7 @@ const locked =
         {mode === "file" && (
           <>
             <label>
-              File (PDF, Word, PowerPoint, Excel or text, up to {RAW_MAX_MB} MB for PDFs, {MAX_MB} MB for other files)
+              File (PDF, Word, PowerPoint, Excel or text, up to {MAX_MB} MB)
               <input
                 type="file"
                 accept={ALLOWED.map((e) => "." + e).join(",")}
@@ -319,23 +325,28 @@ const locked =
               />
             </label>
             {docFile && (
-              <>
-                <p className="muted">
-                  Selected: {docFile.name} ({(docFile.size / 1024 / 1024).toFixed(1)} MB)
-                </p>
-                {extOf(docFile.name) === "pdf" && docFile.size > 5 * 1024 * 1024 && (
-                  <button type="button" className="seg-btn" onClick={shrink} disabled={shrinking}>
-                    {shrinking ? `Shrinking... ${progress}` : "Shrink this PDF"}
-                  </button>
-                )}
-              </>
+              <p className="muted">
+                Selected: {docFile.name} ({(docFile.size / 1024 / 1024).toFixed(1)} MB)
+              </p>
             )}
+            {docFile &&
+              extOf(docFile.name) === "pdf" &&
+              docFile.size > 5 * 1024 * 1024 && (
+                <button
+                  type="button"
+                  className="seg-btn"
+                  onClick={shrink}
+                  disabled={shrinking}
+                >
+                  {shrinking ? `Shrinking... ${progress}` : "Shrink this PDF"}
+                </button>
+              )}
           </>
         )}
 
         {message && <p className="error">{message}</p>}
 
-        <button className="primary" disabled={busy || shrinking}>
+        <button className="primary" disabled={busy}>
           {busy
             ? "Uploading..."
             : mode === "photos"
