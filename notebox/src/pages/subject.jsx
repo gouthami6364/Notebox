@@ -14,38 +14,58 @@ const SECTIONS = [
   { id: "notes", title: "Notes", hint: "Newest first", Icon: BookOpen },
   { id: "homework", title: "Today's homework", hint: "Newest first", Icon: PenLine },
   { id: "assignment", title: "Assignments", hint: "Newest first", Icon: FileText },
-  { id: "internal", title: "Internal papers", hint: "By date", Icon: CalendarCheck },
-  { id: "external", title: "External papers", hint: "By academic year and session", Icon: GraduationCap },
+  { id: "internal", title: "Internal papers", hint: "Newest first", Icon: CalendarCheck },
+  { id: "external", title: "External papers", hint: "Newest first", Icon: GraduationCap },
 ];
 
 export default function Subject() {
   const { code } = useParams();
   const [subject, setSubject] = useState(null);
-  const [counts, setCounts] = useState({});
+  const [counts, setCounts] = useState(null); // null means "unknown"
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    let alive = true;
     async function load() {
-      const s = await supabase
+      setLoading(true);
+      setFailed(false);
+      setSubject(null);
+      setCounts(null);
+
+      // Same query as the Home page, so the offline copy is reused
+      const list = await supabase
         .from("subjects")
         .select("code, name")
-        .eq("code", code)
-        .maybeSingle();
-      setSubject(s.data);
+        .order("code");
+
+      if (!alive) return;
+
+      if (list.error) {
+        setFailed(true);
+        setLoading(false);
+        return;
+      }
+      setSubject((list.data || []).find((s) => s.code === code) || null);
+      setLoading(false);
 
       const d = await supabase
-  .from("documents")
-  .select("section")
-  .eq("subject_code", code)
-  .is("deleted_at", null);
+        .from("documents")
+        .select("section")
+        .eq("subject_code", code)
+        .is("deleted_at", null);
+
+      if (!alive || d.error) return;
       const c = {};
       (d.data || []).forEach((row) => {
         c[row.section] = (c[row.section] || 0) + 1;
       });
       setCounts(c);
-      setLoading(false);
     }
     load();
+    return () => {
+      alive = false;
+    };
   }, [code]);
 
   if (loading) {
@@ -53,6 +73,19 @@ export default function Subject() {
       <main className="app">
         <BackLink to="/" />
         <p className="muted">Loading...</p>
+      </main>
+    );
+  }
+
+  if (failed) {
+    return (
+      <main className="app">
+        <BackLink to="/" />
+        <p>Couldn't load this subject.</p>
+        <p className="muted">
+          If you're offline, open the app on the home screen once with internet
+          so your subjects are saved on this phone.
+        </p>
       </main>
     );
   }
@@ -89,7 +122,9 @@ export default function Subject() {
                   <span className="muted">{sec.hint}</span>
                 </span>
               </span>
-              <span className="muted">{counts[sec.id] || 0}</span>
+              <span className="muted">
+                {counts === null ? "" : counts[sec.id] || 0}
+              </span>
             </Link>
           </li>
         ))}
