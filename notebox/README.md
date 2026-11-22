@@ -6,7 +6,7 @@ A small web app that gives a college class one shared place for notes, homework,
 
 | Home | Subject | Upload | Offline |
 |---|---|---|---|
-| <img src="docs/home.png" width="200" alt="Home screen with the subject list"> | <img src="docs/subject.png" width="200" alt="Subject page with five sections"> | <img src="docs/upload.png" width="200" alt="Upload page with photo pages to reorder"> | <img src="docs/section.png" width="200" alt="A file list opened offline"> |
+| <img src="docs/Home.png" width="200" alt="Home screen with the subject list"> | <img src="docs/Subject.png" width="200" alt="Subject page with five sections"> | <img src="docs/upload.png" width="200" alt="Upload page with photo pages to reorder"> | <img src="docs/Section.png" width="200" alt="A file list opened offline"> |
 
 ## The problem
 
