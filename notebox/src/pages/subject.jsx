@@ -129,7 +129,9 @@ export default function Subject() {
         ))}
       </ul>
 
-      <Link className="primary" to="/upload">+ Add to this subject</Link>
+    <Link className="primary" to={`/upload?subject=${encodeURIComponent(code)}`}>
+  + Add to this subject
+</Link>
     </main>
   );
 }

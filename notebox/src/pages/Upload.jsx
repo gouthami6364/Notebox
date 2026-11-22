@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { makePdf } from "../lib/makePdf";
 import { compressPdf } from "../lib/compressPdf";
@@ -24,7 +24,8 @@ function extOf(name) {
 export default function Upload() {
   const [subjects, setSubjects] = useState([]);
   const [mode, setMode] = useState("photos"); // photos | file
-  const [subject, setSubject] = useState("");
+  const [params] = useSearchParams();
+const [subject, setSubject] = useState(params.get("subject") || "");
   const [section, setSection] = useState("notes");
   const [title, setTitle] = useState("");
   const [name, setName] = useState("");
@@ -41,7 +42,11 @@ export default function Upload() {
       .from("subjects")
       .select("code, name")
       .order("code")
-      .then(({ data }) => setSubjects(data || []));
+      .then(({ data }) => {
+  const list = data || [];
+  setSubjects(list);
+  setSubject((old) => (list.some((s) => s.code === old) ? old : ""));
+});
   }, []);
 
   function addFiles(e) {
@@ -174,7 +179,7 @@ export default function Upload() {
 
   return (
     <main className="app">
-      <BackLink to="/" />
+     <BackLink to={subject ? `/subject/${subject}` : "/"} />
       <h1>Add notes or paper</h1>
 
       <div className="seg" role="group" aria-label="What are you adding?">
