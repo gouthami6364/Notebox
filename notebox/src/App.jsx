@@ -11,16 +11,18 @@ import Edit from "./pages/Edit";
 export default function App() {
   const [status, setStatus] = useState("checking"); // checking | locked | open
 
-  async function verify() {
-    const code = localStorage.getItem("classCode");
-    if (!code) return setStatus("locked");
-    const { data } = await supabase.rpc("check_code", { c: code });
-    if (data) setStatus("open");
-    else {
-      localStorage.removeItem("classCode");
-      setStatus("locked");
-    }
+ async function verify() {
+  const code = localStorage.getItem("classCode");
+  if (!code) return setStatus("locked");
+  if (!navigator.onLine) return setStatus("open");
+  const { data, error } = await supabase.rpc("check_code", { c: code });
+  if (error) return setStatus("open"); // network trouble, so keep them in
+  if (data) setStatus("open");
+  else {
+    localStorage.removeItem("classCode");
+    setStatus("locked");
   }
+}
 
   useEffect(() => {
     verify();

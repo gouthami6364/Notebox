@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import Brand from "../components/Brand";
+
 
 export default function Gate({ onUnlock }) {
   const [code, setCode] = useState("");

@@ -234,3 +234,6 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
   font-size: 15px; font-weight: 600; cursor: pointer;
 }
 .seg-btn:disabled { opacity: .6; cursor: not-allowed; }
+.save-btn { border: 0; cursor: pointer; }
+.save-btn.on { background: var(--accent); color: var(--on-accent); }
+.save-btn:disabled { opacity: .5; cursor: not-allowed; }
