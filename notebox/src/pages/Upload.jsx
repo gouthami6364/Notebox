@@ -238,10 +238,28 @@ export default function Upload() {
 
         {mode === "photos" && (
           <>
-            <label>
-              Photos
-              <input type="file" accept="image/*" multiple onChange={addFiles} />
-            </label>
+            <div className="photo-actions">
+  <label className="seg-btn pick">
+    Take photo
+    <input
+      className="sr-file"
+      type="file"
+      accept="image/*"
+      capture="environment"
+      onChange={addFiles}
+    />
+  </label>
+  <label className="seg-btn pick">
+    Choose from gallery
+    <input
+      className="sr-file"
+      type="file"
+      accept="image/*"
+      multiple
+      onChange={addFiles}
+    />
+  </label>
+</div>
             {files.length > 0 && (
               <ul className="thumbs">
                 {files.map((f, i) => (
