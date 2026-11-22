@@ -261,3 +261,12 @@ a.primary { display: flex; align-items: center; justify-content: center; text-de
   outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
+.context {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+}

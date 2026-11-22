@@ -197,6 +197,12 @@ export default function Section() {
         )}
       </ul>
       {message && <p className="error">{message}</p>}
+      <Link
+  className="primary"
+  to={`/upload?subject=${encodeURIComponent(code)}&section=${section}`}
+>
+  + Add to {TITLES[section] || "this section"}
+</Link>
     </main>
   );
 }

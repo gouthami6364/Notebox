@@ -25,8 +25,12 @@ export default function Upload() {
   const [subjects, setSubjects] = useState([]);
   const [mode, setMode] = useState("photos"); // photos | file
   const [params] = useSearchParams();
-const [subject, setSubject] = useState(params.get("subject") || "");
-  const [section, setSection] = useState("notes");
+const presetSubject = params.get("subject") || "";
+const presetSection = params.get("section") || "";
+const [subject, setSubject] = useState(presetSubject);
+const [section, setSection] = useState(
+  SECTIONS.some((s) => s.id === presetSection) ? presetSection : "notes"
+);
   const [title, setTitle] = useState("");
   const [name, setName] = useState("");
   const [files, setFiles] = useState([]);
@@ -47,6 +51,10 @@ const [subject, setSubject] = useState(params.get("subject") || "");
   setSubjects(list);
   setSubject((old) => (list.some((s) => s.code === old) ? old : ""));
 });
+const locked =
+  Boolean(presetSubject) &&
+  SECTIONS.some((s) => s.id === presetSection) &&
+  (subjects.length === 0 || subjects.some((s) => s.code === presetSubject));
   }, []);
 
   function addFiles(e) {
@@ -170,17 +178,25 @@ const [subject, setSubject] = useState(params.get("subject") || "");
         <a className="primary" href={wa} target="_blank" rel="noreferrer">
           Share to WhatsApp
         </a>
-        <Link className="back wide" to={`/subject/${done.subject}`}>
-          Back to subject
-        </Link>
+       <Link className="back wide" to={`/subject/${done.subject}/${done.section}`}>
+  Back to files
+</Link>
       </main>
     );
   }
 
   return (
     <main className="app">
-     <BackLink to={subject ? `/subject/${subject}` : "/"} />
-      <h1>Add notes or paper</h1>
+    <BackLink
+  to={
+    locked
+      ? `/subject/${subject}/${section}`
+      : subject
+      ? `/subject/${subject}`
+      : "/"
+  }
+/>
+   <h1>{locked ? "Add photos" : "Add notes or paper"}</h1>
 
       <div className="seg" role="group" aria-label="What are you adding?">
         <button
@@ -202,27 +218,38 @@ const [subject, setSubject] = useState(params.get("subject") || "");
       </div>
 
       <form className="form" onSubmit={submit}>
-        <label>
-          Subject
-          <select value={subject} onChange={(e) => setSubject(e.target.value)}>
-            <option value="">Choose...</option>
-            {subjects.map((s) => (
-              <option key={s.code} value={s.code}>
-                {s.code} · {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {locked ? (
+  <p className="context">
+    Adding to{" "}
+    <strong>
+      {subjects.find((s) => s.code === subject)?.name || subject}
+    </strong>{" "}
+    · {SECTIONS.find((s) => s.id === section)?.label}
+  </p>
+) : (
+  <>
+    <label>
+      Subject
+      <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+        <option value="">Choose...</option>
+        {subjects.map((s) => (
+          <option key={s.code} value={s.code}>
+            {s.code} · {s.name}
+          </option>
+        ))}
+      </select>
+    </label>
 
-        <label>
-          Section
-          <select value={section} onChange={(e) => setSection(e.target.value)}>
-            {SECTIONS.map((s) => (
-              <option key={s.id} value={s.id}>{s.label}</option>
-            ))}
-          </select>
-        </label>
-
+    <label>
+      Section
+      <select value={section} onChange={(e) => setSection(e.target.value)}>
+        {SECTIONS.map((s) => (
+          <option key={s.id} value={s.id}>{s.label}</option>
+        ))}
+      </select>
+    </label>
+  </>
+)}
         <label>
           Title
           <input
