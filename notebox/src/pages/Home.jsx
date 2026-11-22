@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import ThemeToggle from "../components/ThemeToggle";
 import Brand from "../components/Brand";
+import { getAllDocs } from "../lib/docs";
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [subjects, setSubjects] = useState([]);
@@ -10,6 +12,7 @@ export default function Home() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    getAllDocs(); 
     supabase
       .from("subjects")
       .select("code, name")

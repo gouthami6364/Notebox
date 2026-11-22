@@ -4,6 +4,7 @@ import { Pencil, Download, Check } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BackLink from "../components/BackLink";
 import { savedSet, saveFile, removeFile, openSaved } from "../lib/offline";
+import { getAllDocs } from "../lib/docs";
 
 const TITLES = {
   notes: "Notes",
@@ -57,27 +58,23 @@ export default function Section() {
   }, []);
 
   useEffect(() => {
-    supabase
-      .from("documents")
-      .select("*")
-      .eq("subject_code", code)
-      .eq("section", section)
-      .is("deleted_at", null)
-      .then(async ({ data, error }) => {
-        if (error) {
-          setError(
-            navigator.onLine
-              ? "Could not load files."
-              : "You're offline, and this list hasn't been opened online yet."
-          );
-        } else {
-          const list = sortDocs(data || []);
-          setDocs(list);
-          setSaved(await savedSet(list.map((d) => urlFor(d.file_path))));
-        }
-        setLoading(false);
-      });
-  }, [code, section]);
+  getAllDocs().then(async ({ docs: all }) => {
+    if (!all) {
+      setError(
+        navigator.onLine
+          ? "Could not load files."
+          : "You're offline. Open the app once with internet to load the lists."
+      );
+    } else {
+      const list = sortDocs(
+        all.filter((d) => d.subject_code === code && d.section === section)
+      );
+      setDocs(list);
+      setSaved(await savedSet(list.map((d) => urlFor(d.file_path))));
+    }
+    setLoading(false);
+  });
+}, [code, section]);
 
   async function open(e, d) {
     const url = urlFor(d.file_path);

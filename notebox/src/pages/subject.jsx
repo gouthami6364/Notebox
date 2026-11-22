@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import BackLink from "../components/BackLink";
+import { getAllDocs } from "../lib/docs";
 
 const SECTIONS = [
   { id: "notes", title: "Notes", hint: "Newest first", Icon: BookOpen },
@@ -49,17 +50,15 @@ export default function Subject() {
       setSubject((list.data || []).find((s) => s.code === code) || null);
       setLoading(false);
 
-      const d = await supabase
-        .from("documents")
-        .select("section")
-        .eq("subject_code", code)
-        .is("deleted_at", null);
-
-      if (!alive || d.error) return;
+      // Counts come from the saved list of all files
+      const { docs } = await getAllDocs();
+      if (!alive || !docs) return;
       const c = {};
-      (d.data || []).forEach((row) => {
-        c[row.section] = (c[row.section] || 0) + 1;
-      });
+      docs
+        .filter((d) => d.subject_code === code)
+        .forEach((row) => {
+          c[row.section] = (c[row.section] || 0) + 1;
+        });
       setCounts(c);
     }
     load();
