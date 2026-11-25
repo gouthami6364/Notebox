@@ -24,6 +24,31 @@ export default function Home() {
         setLoading(false);
       });
   }, []);
+  useEffect(() => {
+  let cancelled = false;
+
+  async function checkExistingSubscription() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
+      if (!cancelled && subscription) {
+        setPushEnabled(true);
+        setPushMessage("Notifications are on for new uploads.");
+      }
+    } catch (err) {
+      console.error("Could not check notification subscription:", err);
+    }
+  }
+
+  checkExistingSubscription();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   async function turnOnNotifications() {
   setPushBusy(true);
   setPushMessage("");
