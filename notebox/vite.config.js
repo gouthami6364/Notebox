@@ -8,9 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: false, // we already have public/manifest.webmanifest
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
-        runtimeCaching: [
+     workbox: {
+  globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
+  importScripts: ["/push-sw.js"],
+  runtimeCaching: [
           {
             urlPattern: ({ url }) =>
               url.hostname.endsWith(".supabase.co") &&
